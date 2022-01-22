@@ -1,0 +1,8 @@
+[package]
+name = "FM-project1"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.38.0"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "a16a5b5b2707674313ebc4d1cdd56b2bae3e74c1"}
