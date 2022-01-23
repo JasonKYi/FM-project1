@@ -1,0 +1,112 @@
+\documentclass[]{article}
+\usepackage{amssymb,amsmath}
+
+\makeatother
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={FM-project-1},
+  pdfauthor={Kexing Ying},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=red,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+
+\usepackage{fontspec}
+  \setmainfont{Bitstream Charter}
+  \setmonofont{Fira Code}
+\usepackage[utf8x]{inputenc}
+\usepackage{amssymb}
+
+\usepackage[margin = 1.5in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{minted}
+\usepackage{newunicodechar}
+\newunicodechar{Ñ}{\ensuremath{\mathcal{N}}}
+\newunicodechar{ᵐ}{\ensuremath{^m}}
+\newunicodechar{ᶜ}{\ensuremath{^c}}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+
+\newcommand\eqae{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily a.e.}}}{=}}}
+
+\setlength\parindent{0pt}
+
+\title{Formalising Mathematics\\
+  \large Project 1}
+\author{Kexing Ying}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+
+For the first project in \textit{Formalising Mathematics}, I decided to formalise a result from 
+measure theory known as Egorov's theorem. Egorov's theorem is a useful result establishing a 
+relation between convergence almost everywhere and uniform convergence. In particular, 
+Egorov's theorem states that a sequence of almost everywhere convergent functions 
+converge uniformly everywhere except on an arbitrarily small set.
+
+Egorov's theorem is used to prove the Vitali convergence theorem 
+(a generalisation of the monotone convergence theorem for uniformly integrable functions)
+and is also useful to simplify more elementary results such as convergence almost 
+everywhere implies convergence in measure. 
+
+\section*{Formalisation of Egorov's Theorem}
+
+We will in this section outline the proof of Egorov's theorem and comment on the formalisation effort.
+For the remainder of this document, let us assume \(\alpha\) is a measure space with measure \(\mu\) 
+and \(\beta\) is a second-countable metric space.
+
+\begin{theorem}[Egorov's Theorem]
+  If \((f_n : \alpha \to \beta)_{n = 0}^\infty\) is a sequence of measurable functions which 
+  converge almost everywhere on a set \(s \subseteq \alpha\) of finite measure to 
+  \(g : \alpha \to \beta\), then, for any \(\epsilon > 0\), there exists some \(t \subseteq s\) 
+  with measure \(\mu(t) \le \epsilon\) and \(f_n\) converges uniformly to \(g\) on 
+  \(s \setminus t\). 
+\end{theorem}
+\begin{proof}
+  Let \(\epsilon > 0\) and for \(i, j \ge 1\), define 
+  \[C_{ij} := \bigcup_{k = j}^\infty \{x \in s \mid |f_k(x) - g(x)| > i^{-1}\}.\]
+  Since \(C_{ij}\) is measurable with finite measure and \(C_{i, j + 1} \subseteq C_{i, j}\), by the 
+  continuity of measures from above, we have 
+  \[\lim_{j \to \infty} \mu(C_{ij}) = 
+    \mu\left(\bigcap_{j = 1}^\infty C_{ij}\right) = 0.\]
+  Now, since \(f_k\) converges to \(g\) almost everywhere, by the definition of 
+  limits, there exists a subsequence \((C_{i, J(i)})\) such that \(\mu(C_{i, J(i)}) < 
+  \epsilon 2^{-i}\). Then, by defining 
+  \[t := \bigcup_{i = 1}^\infty C_{i, J(i)},\]
+  we have 
+  \[\mu(s \setminus t) = \mu\left(\bigcup_{i = 1}^\infty C_{i, J(i)}\right) \le \sum_{i = 1}^\infty \mu(C_{i, J(i)})
+    < \sum_{i = 1}^\infty \epsilon 2^{-i} = \epsilon.\]
+  Now, by construction, the elements of \(t\) are namely the elements \(x\) 
+  which \(|f_k(x) - g(x)|\) converges slower than \(i^{-1}\), the elements in 
+  \(s \setminus t\) converges at a speed uniform bounded above by \(i^{-1}\), and 
+  hence, \(f\) converges to \(g\) uniformly on \(s \setminus t\) as required.
+\end{proof}
+
+In Lean, this statement is represented by 
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm]{Lean}
+lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
+  (hf : ∀ n, measurable (f n)) (hg : measurable g)
+  (hfg : ∀ᵐ x ∂μ, tendsto (λ n, f n x) at_top (Ñ (g x)))
+  {ε : ℝ} (hε : 0 < ε) :
+∃ t, measurable_set t ∧ μ t ≤ ennreal.of_real ε ∧
+  tendsto_uniformly_on f g at_top tᶜ
+\end{minted}
+
+
+
+
+\end{document}
