@@ -174,7 +174,7 @@ the axiom of choice.
 
 Recalling that \mintinline{Lean}{not_convergent_seq_lt_index} provides the index 
 of the subsequence \(J(i)\) of \(C_{ij}\) such that \(\mu(C_{i,J(i)}) < \epsilon 2^{-i}\)
-which existence is provided by \(\lim_{j \to \infty}(\mu(C_{ij}))\), to construct 
+which existence is provided by \(\lim_{j \to \infty}(\mu(C_{ij})) = 0\), to construct 
 such a function, one needs to use the axiom of choice. More specifically, 
 we will use \mintinline{Lean}{classical.some} which depends on the axiom 
 \mintinline{Lean}{classical.choice}.
