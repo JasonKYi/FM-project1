@@ -151,7 +151,7 @@ theorem tendsto_uniformly_on_of_ae_tendsto
 which immediately, by choosing \(s = \mathtt{set.univ}\), we obtain a version of Egorov's 
 theorem for finite measures (which is arguably more useful especially in probability theory)
 \begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
-lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
+theorem tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   (hf : ∀ n, measurable (f n)) (hg : measurable g)
   (hfg : ∀ᵐ x ∂μ, tendsto (λ n, f n x) at_top (Ñ (g x)))
   {ε : ℝ} (hε : 0 < ε) :
@@ -174,7 +174,7 @@ the axiom of choice.
 
 Recalling that \mintinline{Lean}{not_convergent_seq_lt_index} provides the index 
 of the subsequence \(J(i)\) of \(C_{ij}\) such that \(\mu(C_{i,J(i)}) < \epsilon 2^{-i}\)
-which existence is provided by \(\lim_{j \to \infty}(\mu(C_{ij})) = 0\), to construct 
+which existence is provided by \(\lim_{j \to \infty}\mu(C_{ij}) = 0\), to construct 
 such a function, one needs to use the axiom of choice. More specifically, 
 we will use \mintinline{Lean}{classical.some} which depends on the axiom 
 \mintinline{Lean}{classical.choice}.
