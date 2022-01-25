@@ -96,7 +96,7 @@ and \(\beta\) is a second-countable metric space.
   hence, \(f\) converges to \(g\) uniformly on \(s \setminus t\) as required.
 \end{proof}
 
-In Lean, this statement is represented by 
+In Lean, Egorov's theorem is represented by 
 \begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm]{Lean}
 lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   (hf : ∀ n, measurable (f n)) (hg : measurable g)
