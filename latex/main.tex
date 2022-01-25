@@ -63,6 +63,39 @@ Egorov's theorem is used to prove the Vitali convergence theorem
 and is also useful to simplify more elementary results such as convergence almost 
 everywhere implies convergence in measure. 
 
+\section*{Almost Everywhere Filter}
+
+In order to formalise Egorov's theorem, we will need to use the almost everywhere 
+filter from \texttt{mathlib} in order to state the statement of convergence everywhere. 
+We will in this section quickly introduce this definition. 
+
+\texttt{mathlib} defines the almost everywhere filter as the set of all 
+co-null sets (set which complement has measure zero), namely it is defined as
+(omitting the proofs)
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+def measure.ae {α} [measurable_space α] (μ : measure α) : filter α :=
+{ sets := {s | μ sᶜ = 0}, ... }
+\end{minted}
+With the above filter defined, one may introduce all the standard definitions involving 
+almost everywhere with this filter. In our use case, we would like to state the 
+condition of convergence almost everywhere. To achieve this, we use the definition
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+def eventually (p : α → Prop) (f : filter α) : Prop := {x | p x} ∈ f
+\end{minted}
+Unfolding the definition, we observe that \mintinline{Lean}{eventually p μ.ae} is 
+the proposition that \(\mu(\{x \mid \mathtt{p}(x)\})^c = 0\), namely, 
+the set of elements not satisfying \texttt{p} has measure 0. For ease of use, 
+we denote the statement \mintinline{Lean}{eventually p μ.ae} in 
+as \mintinline{Lean}{∀ᵐ x ∂μ, p x}. Thus, with this in mind, we may formulate 
+convergence almost everywhere by taking \texttt{p} the proposition that the 
+sequence of function converges at the point \(x\).
+
+In particular, the proposition that the sequence of functions \(f_n\) converges 
+\(g\) almost everywhere is represented by the statement 
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+  ∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))
+\end{minted}
+
 \section*{Formalisation of Egorov's Theorem}
 
 We will in this section outline the proof of Egorov's theorem and comment on the formalisation effort.
@@ -97,7 +130,7 @@ and \(\beta\) is a second-countable metric space.
 \end{proof}
 
 In Lean, Egorov's theorem is represented by 
-\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm]{Lean}
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
 lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   (hf : ∀ n, measurable (f n)) (hg : measurable g)
   (hfg : ∀ᵐ x ∂μ, tendsto (λ n, f n x) at_top (Ñ (g x)))
@@ -106,7 +139,14 @@ lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   tendsto_uniformly_on f g at_top tᶜ
 \end{minted}
 
-
-
+To prove this statement several auxiliary definitions were introduced. These are 
+namely,
+\begin{itemize}
+  \item \mintinline{Lean}{measure_theory.egorov.not_convergent_seq};
+  \item \mintinline{Lean}{measure_theory.egorov.not_convergent_seq_lt_index};
+  \item \mintinline{Lean}{measure_theory.egorov.Union_not_convergent_seq},
+\end{itemize}
+which corresponds to the declarations \(C_{ij}, J(i)\) and \(\bigcup_{i = 1}^\infty C_{i, J(i)}\) 
+in the proof above respectively.
 
 \end{document}
