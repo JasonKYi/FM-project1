@@ -139,6 +139,17 @@ lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   tendsto_uniformly_on f g at_top tᶜ
 \end{minted}
 
+Instead of proving the statement directly as the proof described, with small modifications 
+to the proof, we proved a slightly more general version of Egorov's theorem first.
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+theorem tendsto_uniformly_on_of_ae_tendsto
+  (hf : ∀ n, measurable (f n)) (hg : measurable g) 
+  (hsm : measurable_set s) (hs : μ s ≠ ∞)
+  (hfg : ∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))) 
+  {ε : ℝ} (hε : 0 < ε) :
+  ∃ t ⊆ s, measurable_set t ∧ μ t ≤ ennreal.of_real ε ∧ 
+    tendsto_uniformly_on f g at_top (s \ t)
+\end{minted}
 To prove this statement several auxiliary definitions were introduced. These are 
 namely,
 \begin{itemize}
@@ -147,6 +158,50 @@ namely,
   \item \mintinline{Lean}{measure_theory.egorov.Union_not_convergent_seq},
 \end{itemize}
 which corresponds to the declarations \(C_{ij}, J(i)\) and \(\bigcup_{i = 1}^\infty C_{i, J(i)}\) 
-in the proof above respectively.
+in the proof above respectively. The implementation of these definitions are mostly
+identical to their mathematical definitions except perhaps the definition of 
+\mintinline{Lean}{not_convergent_seq_lt_index} where we explicitly invoke 
+the axiom of choice. 
+
+Recalling that \mintinline{Lean}{not_convergent_seq_lt_index} provides the index 
+of the subsequence \(J(i)\) of \(C_{ij}\) such that \(\mu(C_{i,J(i)}) < \epsilon 2^{-i}\)
+which existence is provided by \(\lim_{j \to \infty}(\mu(C_{ij}))\), to construct 
+such a function, one needs to use the axiom of choice. More specifically, 
+we will use \mintinline{Lean}{classical.some} which depends on the axiom 
+\mintinline{Lean}{classical.choice}.
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+  def some {a : Sort*} {p : a → Prop} (h : ∃ x, p x) : a := ...
+\end{minted}
+In words, given some predicate on some type and the proof that there exists a term 
+of that type satisfying the predicate, \mintinline{Lean}{classical.some} chooses an 
+term of that type satisfying the predicate. Hence, armed with \mintinline{Lean}{classical.some},
+we can construct the required index function by providing a proof 
+that there exists some \(J_i\) such that \(\mu(C_{i, J_i}) < \epsilon 2^{-i}\).
+This proof is known as \mintinline{Lean}{measure_theory.egorov.exists_not_convergent_seq_lt}.
+
+\section*{Implementation Decisions}
+
+There are in general two ways of constructing proofs in analysis such as this one. 
+One may, as this project has demonstrated, define auxiliary definitions and lemmas 
+for the main theorem and prove it modularly. This approach is more readable and 
+is in general easier to work with although it does generate many unuseful 
+declarations. One may make these declarations private although this is normally 
+discouraged since it is possible one might want to reuse them in other contexts, 
+instead, one normally put these declarations in a special namespace to avoid 
+name clashes in the future.
+
+This approach is however not always possible especially if the proof involves 
+inter-winding definitions which carries along a lot of data and proofs. This can 
+be seen from the fact that all lemmas and definitions in this project require 
+a lot of arguments which results in clutter. To avoid this, one may simply 
+define local declarations within the proof itself as all required arguments are 
+then within the local context. 
+
+An example of the second approach can be found in \texttt{mathlib} in the formalisation 
+of the Lebesgue decomposition theorem 
+\href{https://github.com/leanprover-community/mathlib/blob/master/src/measure_theory/decomposition/lebesgue.lean#L604}{here}
+where we see that \(\xi\) is defined locally with local lemmas. The downside to this 
+approach is that the proofs becomes excessively long, and normally becomes hard 
+to maintain as the proof will take much longer to compile after each tactic.  
 
 \end{document}
