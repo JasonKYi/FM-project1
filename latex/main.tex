@@ -26,6 +26,7 @@
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage[ruled,vlined]{algorithm2e}
+\usepackage{parskip}
 
 \usepackage{minted}
 \usepackage{newunicodechar}
@@ -40,8 +41,6 @@
 \newtheorem{proposition}{Proposition}[section]
 
 \newcommand\eqae{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily a.e.}}}{=}}}
-
-\setlength\parindent{0pt}
 
 \title{Formalising Mathematics\\
   \large Project 1}
@@ -62,6 +61,15 @@ Egorov's theorem is used to prove the Vitali convergence theorem
 (a generalisation of the monotone convergence theorem for uniformly integrable functions)
 and is also useful to simplify more elementary results such as convergence almost 
 everywhere implies convergence in measure. 
+
+The content of this project has now been published to Lean's maths library - 
+\texttt{mathlib} and can be found (at the time of writing) 
+\href{https://github.com/leanprover-community/mathlib/blob/master/src/measure_theory/function/uniform_integrable.lean}{here}.
+As the name of the \texttt{mathlib} file suggest, this theorem is intended for future 
+work and is a part of the overall 
+\href{https://github.com/leanprover-community/mathlib/projects/15}{project} 
+for formalising martingales in Lean others and I are working towards. 
+
 
 \section*{Almost Everywhere Filter}
 
@@ -121,7 +129,8 @@ and \(\beta\) is a second-countable metric space.
   \epsilon 2^{-i}\). Then, by defining 
   \[t := \bigcup_{i = 1}^\infty C_{i, J(i)},\]
   we have 
-  \[\mu(s \setminus t) = \mu\left(\bigcup_{i = 1}^\infty C_{i, J(i)}\right) \le \sum_{i = 1}^\infty \mu(C_{i, J(i)})
+  \[\mu(t) = \mu\left(\bigcup_{i = 1}^\infty C_{i, J(i)}\right) \le 
+    \sum_{i = 1}^\infty \mu(C_{i, J(i)})
     < \sum_{i = 1}^\infty \epsilon 2^{-i} = \epsilon.\]
   Now, by construction, the elements of \(t\) are namely the elements \(x\) 
   which \(|f_k(x) - g(x)|\) converges slower than \(i^{-1}\), the elements in 
@@ -131,6 +140,17 @@ and \(\beta\) is a second-countable metric space.
 
 In Lean, Egorov's theorem is represented by 
 \begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
+theorem tendsto_uniformly_on_of_ae_tendsto
+  (hf : ∀ n, measurable (f n)) (hg : measurable g) 
+  (hsm : measurable_set s) (hs : μ s ≠ ∞)
+  (hfg : ∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))) 
+  {ε : ℝ} (hε : 0 < ε) :
+∃ t ⊆ s, measurable_set t ∧ μ t ≤ ennreal.of_real ε ∧ 
+  tendsto_uniformly_on f g at_top (s \ t)
+\end{minted}
+which immediately, by choosing \(s = \mathtt{set.univ}\), we obtain a version of Egorov's 
+theorem for finite measures (which is arguably more useful especially in probability theory)
+\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
 lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   (hf : ∀ n, measurable (f n)) (hg : measurable g)
   (hfg : ∀ᵐ x ∂μ, tendsto (λ n, f n x) at_top (Ñ (g x)))
@@ -139,17 +159,6 @@ lemma tendsto_uniformly_on_of_ae_tendsto' [is_finite_measure μ]
   tendsto_uniformly_on f g at_top tᶜ
 \end{minted}
 
-Instead of proving the statement directly as the proof described, with small modifications 
-to the proof, we proved a slightly more general version of Egorov's theorem first.
-\begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
-theorem tendsto_uniformly_on_of_ae_tendsto
-  (hf : ∀ n, measurable (f n)) (hg : measurable g) 
-  (hsm : measurable_set s) (hs : μ s ≠ ∞)
-  (hfg : ∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))) 
-  {ε : ℝ} (hε : 0 < ε) :
-  ∃ t ⊆ s, measurable_set t ∧ μ t ≤ ennreal.of_real ε ∧ 
-    tendsto_uniformly_on f g at_top (s \ t)
-\end{minted}
 To prove this statement several auxiliary definitions were introduced. These are 
 namely,
 \begin{itemize}
@@ -178,6 +187,12 @@ term of that type satisfying the predicate. Hence, armed with \mintinline{Lean}{
 we can construct the required index function by providing a proof 
 that there exists some \(J_i\) such that \(\mu(C_{i, J_i}) < \epsilon 2^{-i}\).
 This proof is known as \mintinline{Lean}{measure_theory.egorov.exists_not_convergent_seq_lt}.
+
+With these definitions in mind, the proof of the overall statement in Lean is 
+extremely similar to the proof on paper except perhaps for the fact that \(f\)
+converges uniformly on \(s \setminus t\). While on paper, we compared the rate 
+of convergence, we will need to fill in the details in Lean. Nonetheless, by 
+unfolding the definitions, this remains to be a routine \(\epsilon-\delta\) proof.
 
 \section*{Implementation Decisions}
 
