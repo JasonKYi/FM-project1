@@ -153,12 +153,19 @@ lemma tendsto_uniformly_on_diff_Union_not_convergent_seq (hε : 0 < ε)
   tendsto_uniformly_on f g at_top (s \ egorov.Union_not_convergent_seq hε hf hg hsm hs hfg) :=
 begin
   rw metric.tendsto_uniformly_on_iff,
+  -- Fix `δ > 0`
   intros δ hδ,
+  -- Let `N` be a natural number such that `1 / (N + 1) < δ`
   obtain ⟨N, hN⟩ := exists_nat_one_div_lt hδ,
   rw eventually_at_top,
+  -- Use the index obtained from `not_convergent_seq_lt_index` since 
+  -- `not_convergent_seq_lt_index_spec` provides the required inequality
+  -- and let `n` be an element larger than the index and let `x` be an element in 
+  -- `s \ Union_not_convergent_seq`
   refine ⟨egorov.not_convergent_seq_lt_index (half_pos hε) hf hg hsm hs hfg N, λ n hn x hx, _⟩,
   simp only [mem_diff, egorov.Union_not_convergent_seq, not_exists, mem_Union, mem_inter_eq,
     not_and, exists_and_distrib_left] at hx,
+  -- but `x ∈ s \ Union_not_convergent_seq` implies the inequality specialized at `N`
   obtain ⟨hxs, hx⟩ := hx,
   specialize hx hxs N,
   rw egorov.mem_not_convergent_seq_iff at hx,
