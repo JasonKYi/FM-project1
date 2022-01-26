@@ -93,7 +93,7 @@ def eventually (p : α → Prop) (f : filter α) : Prop := {x | p x} ∈ f
 Unfolding the definition, we observe that \mintinline{Lean}{eventually p μ.ae} is 
 the proposition that \(\mu(\{x \mid \mathtt{p}(x)\})^c = 0\), namely, 
 the set of elements not satisfying \texttt{p} has measure 0. For ease of use, 
-we denote the statement \mintinline{Lean}{eventually p μ.ae} in 
+we denote the statement \mintinline{Lean}{eventually p μ.ae} in Lean
 as \mintinline{Lean}{∀ᵐ x ∂μ, p x}. Thus, with this in mind, we may formulate 
 convergence almost everywhere by taking \texttt{p} the proposition that the 
 sequence of function converges at the point \(x\).
@@ -101,7 +101,7 @@ sequence of function converges at the point \(x\).
 In particular, the proposition that the sequence of functions \(f_n\) converges 
 \(g\) almost everywhere is represented by the statement 
 \begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
-  ∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))
+∀ᵐ x ∂μ, x ∈ s → tendsto (λ n, f n x) at_top (Ñ (g x))
 \end{minted}
 
 \section*{Formalisation of Egorov's Theorem}
@@ -179,7 +179,7 @@ such a function, one needs to use the axiom of choice. More specifically,
 we will use \mintinline{Lean}{classical.some} which depends on the axiom 
 \mintinline{Lean}{classical.choice}.
 \begin{minted}[mathescape, numbersep=5pt, frame=lines, framesep=2mm, fontsize=\small]{Lean}
-  def some {a : Sort*} {p : a → Prop} (h : ∃ x, p x) : a := ...
+def some {a : Sort*} {p : a → Prop} (h : ∃ x, p x) : a := ...
 \end{minted}
 In words, given some predicate on some type and the proof that there exists a term 
 of that type satisfying the predicate, \mintinline{Lean}{classical.some} chooses an 
